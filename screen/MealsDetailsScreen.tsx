@@ -9,24 +9,41 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useLayoutEffect} from 'react';
+import React, {useContext, useLayoutEffect} from 'react';
 import {CATEGORIES, MEALS} from '../data/dummy-data';
+import {FavoritesCon} from '../store/context/favorite-context';
+import FavIcon from 'react-native-vector-icons/Ionicons';
 
 const MealsDetailsScreen = ({route, navigation}) => {
   const mealId = route?.params?.mealId;
 
+  const favMealsContext = useContext(FavoritesCon);
+  const isFavoriteMeals = favMealsContext.ids.includes(mealId);
+
+  console.log(mealId, isFavoriteMeals, 'id');
+
   const SelectMeals = MEALS.find(meal => meal?.id === mealId);
+
+  const ChangeFavHandler = () => {
+    console.log('chan press', isFavoriteMeals);
+    if (isFavoriteMeals) {
+      console.log('1');
+
+      favMealsContext.removeFavorite(mealId);
+    } else {
+      console.log('2');
+
+      favMealsContext.addFavorite(mealId);
+    }
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Button
-          onPress={() => alert('This is a button!')}
-          title="Update count"
-        />
+        <FavIcon name="star" size={26} onPress={ChangeFavHandler} />
       ),
     });
-  }, [navigation]);
+  }, [navigation, ChangeFavHandler]);
 
   return (
     <ScrollView
@@ -50,8 +67,6 @@ const MealsDetailsScreen = ({route, navigation}) => {
       </View>
       <Text>ingredients</Text>
       {SelectMeals?.ingredients?.map(data => {
-        console.log(data, 'lll');
-
         return (
           <View
             style={{
